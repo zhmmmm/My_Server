@@ -121,17 +121,17 @@ int main()
 	typedef int(*Function)(int&, int&);
 	typedef int(*__InitSocket)();
 	typedef int(*__CreateSocket)(SOCKET&);
-	typedef int(*__BindingSocket)(int&, SOCKET&,u_short);
+	typedef int(*__BindingSocket)(int&, SOCKET&, u_short);
 	typedef int(*__StartMonitor)(int&, SOCKET&);
-	typedef int(*__ReceiveClientRequest)(SOCKET&,SOCKET&);
-	typedef int(*__ReceiveClientData)(SOCKET&,SOCKET&,char*,int,int&);
+	typedef int(*__ReceiveClientRequest)(SOCKET&, SOCKET&);
+	typedef int(*__ReceiveClientData)(SOCKET&, SOCKET&, char*, int, int&);
 	typedef int(*__ServerLogic)(char *Data);
 	typedef int(*__SendClientData)(SOCKET&, char*);
 	typedef int(*__ExitServer)(SOCKET&, SOCKET&);
 	if (hDll)
 	{
 		Function function = (Function)GetProcAddress(hDll, "Function");
-		int num = function(num1,num2);
+		int num = function(num1, num2);
 		std::cout << "Ok " << num << std::endl;
 		std::cout << "Num1:" << num1 << std::endl;
 		std::cout << "Num2:" << num2 << std::endl;
@@ -142,7 +142,7 @@ int main()
 		char Buf[64] = { 0 };
 		u_short Port = 4999;
 
-		__InitSocket InitSocket = (__InitSocket)GetProcAddress(hDll,"InitSocket");
+		__InitSocket InitSocket = (__InitSocket)GetProcAddress(hDll, "InitSocket");
 		int InitSocketReturn = InitSocket();
 		if (InitSocketReturn == 2)
 		{
@@ -155,19 +155,19 @@ int main()
 			std::cout << "创建套字节成功！" << std::endl;
 		}
 		__BindingSocket BindingSocket = (__BindingSocket)GetProcAddress(hDll, "BindingSocket");
-		int BindingSocketReturn = BindingSocket(RetValue,sServer, Port);
+		int BindingSocketReturn = BindingSocket(RetValue, sServer, Port);
 		if (BindingSocketReturn == 2)
 		{
 			std::cout << "绑定套字节成功！" << std::endl;
 		}
 		__StartMonitor StartMonitor = (__StartMonitor)GetProcAddress(hDll, "StartMonitor");
-		int StartMonitorReturn = StartMonitor(RetValue,sServer);
+		int StartMonitorReturn = StartMonitor(RetValue, sServer);
 		if (StartMonitorReturn == 2)
 		{
 			std::cout << "开始监听成功！" << std::endl;
 		}
 		__ReceiveClientRequest ReceiveClientRequest = (__ReceiveClientRequest)GetProcAddress(hDll, "ReceiveClientRequest");
-		int ReceiveClientRequestReturn = ReceiveClientRequest(sServer,sClient);
+		int ReceiveClientRequestReturn = ReceiveClientRequest(sServer, sClient);
 		if (ReceiveClientRequestReturn == 2)
 		{
 			std::cout << "接受客户端请求成功！" << std::endl;
@@ -175,7 +175,7 @@ int main()
 		while (true)
 		{
 			__ReceiveClientData ReceiveClientData = (__ReceiveClientData)GetProcAddress(hDll, "ReceiveClientData");
-			int ReceiveClientDataReturn = ReceiveClientData(sServer,sClient,Buf,64,RetValue);
+			int ReceiveClientDataReturn = ReceiveClientData(sServer, sClient, Buf, 64, RetValue);
 			if (ReceiveClientDataReturn == 1)
 			{
 				std::cout << "服务器接受成功！" << std::endl;
@@ -195,7 +195,7 @@ int main()
 
 
 		__ExitServer ExitServer = (__ExitServer)GetProcAddress(hDll, "ExitServer");
-		int ExitServerReturn = ExitServer(sServer,sClient);
+		int ExitServerReturn = ExitServer(sServer, sClient);
 		if (ExitServerReturn == 0)
 		{
 			std::cout << "退出成功！" << std::endl;
