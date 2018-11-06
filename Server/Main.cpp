@@ -1,6 +1,6 @@
 // Server.cpp : Defines the entry point for the console application.
 
-#include "winsock2.h"
+#include <winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
 #include <iostream>
 #include <Windows.h>
@@ -172,27 +172,66 @@ int main()
 		{
 			std::cout << "接受客户端请求成功！" << std::endl;
 		}
+		__ReceiveClientData ReceiveClientData = (__ReceiveClientData)GetProcAddress(hDll, "ReceiveClientData");
+		int ReceiveClientDataReturn = 0;
+		int State = 0;
 		while (true)
 		{
-			__ReceiveClientData ReceiveClientData = (__ReceiveClientData)GetProcAddress(hDll, "ReceiveClientData");
-			int ReceiveClientDataReturn = ReceiveClientData(sServer, sClient, Buf, 64, RetValue);
-			if (ReceiveClientDataReturn == 1)
+			ReceiveClientDataReturn = ReceiveClientData(sServer, sClient, Buf, 64, RetValue);
+			if (ReceiveClientDataReturn == -1)
 			{
-				std::cout << "服务器接受成功！" << std::endl;
+				std::cout << "客户端退出！" << std::endl;
+				closesocket(sClient);    //关闭套接字
+				sClient = NULL;
+				if (State == 0)
+				{
+					State = 1;
+				}
+				if (State == 1)
+				{
+					int InitSocketReturn = InitSocket();
+					if (InitSocketReturn == 2)
+					{
+						std::cout << "初始化成功！" << std::endl;
+					}
+					int CreateSocketReturn = CreateSocket(sServer);
+					if (CreateSocketReturn == 2)
+					{
+						std::cout << "创建套字节成功！" << std::endl;
+					}
+					int BindingSocketReturn = BindingSocket(RetValue, sServer, Port);
+					if (BindingSocketReturn == 2)
+					{
+						std::cout << "绑定套字节成功！" << std::endl;
+					}
+					int StartMonitorReturn = StartMonitor(RetValue, sServer);
+					if (StartMonitorReturn == 2)
+					{
+						std::cout << "开始监听成功！" << std::endl;
+					}
+					int ReceiveClientRequestReturn = ReceiveClientRequest(sServer, sClient);
+					if (ReceiveClientRequestReturn == 2)
+					{
+						std::cout << "接受客户端请求成功！" << std::endl;
+						ReceiveClientDataReturn = 0;//直到有客户端连接成功
+					}
+					State = 0;
+				}
 			}
-			std::cout << "服务器收到：" << Buf << std::endl;
+			std::cout << Buf << std::endl;
 
-			__SendClientData SendClientData = (__SendClientData)GetProcAddress(hDll, "SendClientData");
-			char SendData[64] = { 0 };
-			std::cout << "输入向客户端的消息：";
-			std::cin >> SendData;
-			int SendClientDataReturn = SendClientData(sClient, SendData);
-			if (SendClientDataReturn == 1)
+			if (sClient != NULL)
 			{
-				std::cout << "发送成功！" << std::endl;
+				__SendClientData SendClientData = (__SendClientData)GetProcAddress(hDll, "SendClientData");
+				char SendData[64] = "ServerOk Send Sclient";
+				int SendClientDataReturn = SendClientData(sClient, SendData);
+				if (SendClientDataReturn == 1)
+				{
+					std::cout << "服务器发送成功！" << std::endl;
+				}
 			}
+
 		}
-
 
 		__ExitServer ExitServer = (__ExitServer)GetProcAddress(hDll, "ExitServer");
 		int ExitServerReturn = ExitServer(sServer, sClient);
