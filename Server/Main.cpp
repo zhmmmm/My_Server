@@ -1,9 +1,8 @@
-// Server.cpp : Defines the entry point for the console application.
-
 #include <winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
 #include <iostream>
 #include <Windows.h>
+#pragma comment(lib,"..\\Debug\\ServerDll.lib")
 using namespace std;
 
 int InitSocket()
